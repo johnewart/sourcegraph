@@ -10,7 +10,7 @@ import (
 	"github.com/sourcegraph/sourcegraph/pkg/repoupdater"
 )
 
-func (r *repositoryResolver) ExternalRepository() *externalRepositoryResolver {
+func (r *RepositoryResolver) ExternalRepository() *externalRepositoryResolver {
 	if r.repo.ExternalRepo == nil {
 		return nil
 	}
@@ -18,7 +18,7 @@ func (r *repositoryResolver) ExternalRepository() *externalRepositoryResolver {
 }
 
 type externalRepositoryResolver struct {
-	repository *repositoryResolver
+	repository *RepositoryResolver
 }
 
 func (r *externalRepositoryResolver) ID() string { return r.repository.repo.ExternalRepo.ID }
@@ -30,7 +30,7 @@ func (r *externalRepositoryResolver) ServiceID() string {
 	return r.repository.repo.ExternalRepo.ServiceID
 }
 
-func (r *repositoryResolver) ExternalServices(ctx context.Context, args *struct {
+func (r *RepositoryResolver) ExternalServices(ctx context.Context, args *struct {
 	graphqlutil.ConnectionArgs
 }) (*computedExternalServiceConnectionResolver, error) {
 	// 🚨 SECURITY: Only site admins may read external services (they have secrets).

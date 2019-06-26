@@ -227,7 +227,7 @@ func (r *searchResolver) Suggestions(ctx context.Context, args *searchSuggestion
 	for _, s := range allSuggestions {
 		var k key
 		switch s := s.result.(type) {
-		case *repositoryResolver:
+		case *RepositoryResolver:
 			k.repoName = s.repo.Name
 		case *gitTreeEntryResolver:
 			k.repoName = s.commit.repo.repo.Name

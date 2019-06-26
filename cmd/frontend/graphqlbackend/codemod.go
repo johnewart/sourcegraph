@@ -279,7 +279,7 @@ func callCodemodInRepo(ctx context.Context, repoRevs search.RepositoryRevisions,
 		}
 		results[i] = &codemodResultResolver{
 			commit: &GitCommitResolver{
-				repo:     &repositoryResolver{repo: repoRevs.Repo},
+				repo:     &RepositoryResolver{repo: repoRevs.Repo},
 				inputRev: &repoRevs.Revs[0].RevSpec,
 			},
 			path:    raw.URI,
