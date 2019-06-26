@@ -178,6 +178,7 @@ type StatusMessageType string
 
 const (
 	CloningStatusMessage StatusMessageType = "CLONING"
+	SyncingErrorMessage  StatusMessageType = "SYNCERROR"
 )
 
 type StatusMessage struct {

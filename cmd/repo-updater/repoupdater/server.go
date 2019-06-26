@@ -450,6 +450,13 @@ func (s *Server) handleStatusMessages(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if lastSourcerErr := s.Syncer.GetLastSourcerErr(); lastSourcerErr != nil {
+		resp.Messages = append(resp.Messages, protocol.StatusMessage{
+			Message: lastSourcerErr.Error(),
+			Type:    protocol.SyncingErrorMessage,
+		})
+	}
+
 	log15.Debug("TRACE handleStatusMessages", "messages", resp.Messages)
 
 	respond(w, http.StatusOK, resp)

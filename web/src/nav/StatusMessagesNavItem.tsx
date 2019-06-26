@@ -101,7 +101,46 @@ export class StatusMessagesNavItem extends React.PureComponent<Props, State> {
                         linkText="Configure external services"
                     />
                 )
+            case GQL.StatusMessageType.SYNCERROR:
+                return (
+                    <StatusMessagesNavItemEntry
+                        key={message.message}
+                        title="Syncing repositories failed"
+                        text={message.message}
+                        showLink={this.props.isSiteAdmin}
+                        linkTo="/site-admin/external-services"
+                        linkText="Configure external services"
+                    />
+                )
         }
+    }
+
+    private renderIcon(): JSX.Element | null {
+        if (isErrorLike(this.state.messagesOrError)) {
+            return <CloudAlertIcon className="icon-inline" />
+        }
+        if (this.state.messagesOrError.some(({ type }) => type === GQL.StatusMessageType.SYNCERROR)) {
+            return (
+                <CloudAlertIcon
+                    className="icon-inline"
+                    data-tooltip={this.state.isOpen ? undefined : 'Syncing repositories failed!'}
+                />
+            )
+        }
+        if (this.state.messagesOrError.some(({ type }) => type === GQL.StatusMessageType.CLONING)) {
+            return (
+                <CloudSyncIcon
+                    className="icon-inline"
+                    data-tooltip={this.state.isOpen ? undefined : 'Cloning repositories...'}
+                />
+            )
+        }
+        return (
+            <CloudCheckIcon
+                className="icon-inline"
+                data-tooltip={this.state.isOpen ? undefined : 'Repositories up to date'}
+            />
+        )
     }
 
     public render(): JSX.Element | null {
@@ -112,19 +151,7 @@ export class StatusMessagesNavItem extends React.PureComponent<Props, State> {
                 className="nav-link py-0 px-0 status-messages-nav-item__nav-link"
             >
                 <DropdownToggle caret={false} className="btn btn-icon" nav={true}>
-                    {isErrorLike(this.state.messagesOrError) ? (
-                        <CloudAlertIcon className="icon-inline" />
-                    ) : this.state.messagesOrError.some(({ type }) => type === GQL.StatusMessageType.CLONING) ? (
-                        <CloudSyncIcon
-                            className="icon-inline"
-                            data-tooltip={this.state.isOpen ? undefined : 'Cloning repositories...'}
-                        />
-                    ) : (
-                        <CloudCheckIcon
-                            className="icon-inline"
-                            data-tooltip={this.state.isOpen ? undefined : 'Repositories up to date'}
-                        />
-                    )}
+                    {this.renderIcon()}
                 </DropdownToggle>
 
                 <DropdownMenu right={true} className="status-messages-nav-item__dropdown-menu">
