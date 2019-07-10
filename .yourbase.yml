@@ -1,0 +1,16 @@
+dependencies:
+  build:
+    - go:1.12.1
+
+build_targets:
+  - name: default
+    commands:
+      - go build
+  - name: genconfig
+    commands:
+      - go run ./enterprise/dev/ci/gen-pipeline.go
+
+
+ci:
+  - name: autogen
+    build_target: genconfig
