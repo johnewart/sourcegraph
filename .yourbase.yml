@@ -12,5 +12,6 @@ build_targets:
 
 
 ci:
-  - name: autogen
-    build_target: genconfig
+  builds:
+    - name: autogen
+      build_target: genconfig
