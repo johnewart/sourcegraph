@@ -4,12 +4,15 @@ dependencies:
 
 build_targets:
   - name: default
+    tags:
+      channel: experimental
     commands:
       - go build
   - name: genconfig
+    tags:
+      channel: experimental
     commands:
       - go run ./enterprise/dev/ci/gen-pipeline.go
-
 
 ci:
   builds:
