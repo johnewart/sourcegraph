@@ -20,6 +20,7 @@ build_targets:
     environment:
       - FORCE_COLOR=0
     commands:
+      - npm install yarn
       - yarn --frozen-lockfile 
 
   - name: browser
