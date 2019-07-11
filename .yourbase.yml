@@ -39,7 +39,7 @@ build_targets:
 
   - name: generate-go
     commands:
-      - bash -c 'go list ./... | xargs go generate -x'
+      - bash ./dev/generate.sh
 
 
   - name: server
