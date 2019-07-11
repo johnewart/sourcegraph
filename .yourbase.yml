@@ -1,6 +1,7 @@
 dependencies:
   build:
     - go:1.12.1
+    - node:12.6.0
 
 build_targets:
   - name: default
@@ -8,13 +9,77 @@ build_targets:
       channel: experimental
     commands:
       - go build
+
   - name: genconfig
     tags:
       channel: experimental
     commands:
       - go run ./enterprise/dev/ci/gen-pipeline.go
 
+  - name: setup 
+    environment:
+      - FORCE_COLOR=0
+    commands:
+      - yarn --frozen-lockfile 
+
+  - name: browser
+    root: browser
+    environment:
+      - TARGETS=phabricator
+    commands:
+      - yarn build 
+
+  - name: web
+    root: web
+    environment:
+      - NODE_ENV=production
+    commands:
+      - yarn -s run build --color 
+
+  - name: generate-go
+    commands:
+      - bash -c 'go list ./... | xargs go generate -x'
+
+
+  - name: server
+    commands:
+      - bash ./cmd/server/build.sh 
+
+
+  - name: enterprise_build
+    build_after: 
+      - setup
+      - browser
+      - web 
+      - generate-go
+      - server
+
+    environment:
+      - DATE="2019-07-10T16:08:45-07:00"
+      - ENTERPRISE="1"
+      - FORCE_COLOR="0"
+      - GO111MODULE="on"
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD="true"
+      - VERSION=00000_2019-07-10_1234567
+    tags:
+      channel: experimental 
+    commands:
+      - bash ./dev/check/all.sh
+      - bash dev/ci/yarn-run.sh prettier-check all:tslint-eslint all:stylelint all:typecheck graphql-lint
+      - bash dev/ci/yarn-build.sh browser
+      - bash dev/ci/yarn-build.sh web
+      - bash dev/ci/yarn-test.sh web
+      - bash dev/ci/yarn-test.sh browser
+      - bash dev/ci/yarn-test.sh shared
+      - bash dev/ci/yarn-run.sh storybook:smoke-test
+      - bash ./dev/ci/ci-db-backcompat.sh
+      - bash ./cmd/symbols/build.sh buildLibsqlite3Pcre
+      - go test -timeout 4m -coverprofile=coverage.txt -covermode=atomic -race ./...
+      - go generate ./...
+      - go install -tags dist ./cmd/... ./enterprise/cmd/...
+ 
+ 
 ci:
   builds:
-    - name: autogen
-      build_target: genconfig
+    - name: build for enterprise
+      build_target: enterprise_build
