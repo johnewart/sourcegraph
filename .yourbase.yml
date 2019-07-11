@@ -21,7 +21,7 @@ build_targets:
       - FORCE_COLOR=0
     commands:
       - npm install yarn
-      - yarn --frozen-lockfile 
+      - yarn
 
   - name: browser
     root: browser
