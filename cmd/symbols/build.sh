@@ -93,7 +93,7 @@ function buildExecutable() {
                 fi
                 ;;
             linux*)
-                muslGcc="musl-gcc"
+                muslGcc="x86_64-linux-musl-gcc"
                 if ! command -v "$muslGcc" >/dev/null 2>&1; then
                     echo "Couldn't find musl C compiler $muslGcc. Install the musl-tools package (e.g. on Ubuntu, run `apt-get install musl-tools`)."
                     exit 1
