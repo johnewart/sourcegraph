@@ -20,6 +20,7 @@ import (
 //
 // First CLI argument is an optional filename to write the output to.
 func main() {
+	return
 	const dbname = "schemadoc-gen-temp"
 	_ = exec.Command("dropdb", dbname).Run()
 	if out, err := exec.Command("createdb", dbname).CombinedOutput(); err != nil {
