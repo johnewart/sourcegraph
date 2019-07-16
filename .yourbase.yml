@@ -2,6 +2,11 @@ dependencies:
   build:
     - go:1.12.1
     - node:12.6.0
+    - homebrew:latest
+  runtime:
+    - go:1.12.1
+    - node:12.6.0
+    - homebrew:latest
 
 build_targets:
   - name: default
@@ -20,7 +25,15 @@ build_targets:
     environment:
       - FORCE_COLOR=0
     commands:
-      - npm install yarn
+      - brew install postgresql
+      - brew install sqlite3
+      - brew install pcre
+      - brew install johnewart/homebrew-make/make
+      - brew install FiloSottile/musl-cross/musl-cross
+      - npm install gulp 
+      - npm install yarn 
+      - npm install typescript 
+      - npm install ts-node
       - yarn
 
   - name: browser
@@ -42,18 +55,20 @@ build_targets:
       - bash ./dev/generate.sh
 
 
-  - name: server
+  - name: server-enterprise
+    root: enterprise
+    environment:
+      - VERSION=YBDEVELOPMENT
     commands:
       - bash ./cmd/server/build.sh 
-
-
+  
   - name: enterprise_build
     build_after: 
       - setup
       - browser
       - web 
+      - server-enterprise
       - generate-go
-      - server
 
     environment:
       - DATE="2019-07-10T16:08:45-07:00"
