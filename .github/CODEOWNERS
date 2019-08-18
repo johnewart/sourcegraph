@@ -84,6 +84,9 @@
 /dev/src-expose @keegancsmith
 /dev/drop-test-databases.sh @efritz
 /dev/squash-migrations.sh @efritz
+/dev/check/hadolint.sh @beyang
+/comby.sh @beyang
+/.yourbase.yml @beyang
 /.buildkite @beyang
 /.storybook @felixfbecker
 /CONTRIBUTING.md @beyang @nicksnyder @slimsag

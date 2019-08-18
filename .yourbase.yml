@@ -1,0 +1,158 @@
+dependencies:
+  build:
+    - go:1.12.1
+    - node:12.6.0
+    - yarn:1.17.3
+    - python:2.7.16
+  runtime:
+    - go:1.12.1
+    - node:12.6.0
+    - yarn:1.17.3
+    - python:2.7.16
+
+build_targets:
+    
+  - &base
+    name: base
+    container:
+      image: yourbase/yb_ubuntu:18.04
+    dependencies:
+      containers:
+        postgres:
+          label: postgres
+          image: postgres:11.4
+          environment:
+            - POSTGRES_PASSWORD=sg
+            - POSTGRES_USER=sg
+            - POSTGRES_DB=sg
+          port_check:
+            port: 5432
+            timeout: 45
+        redis:
+          image: redis:latest
+          port_check: 
+            port: 6379
+            timeout: 10
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - REDIS_HOSTPORT={{ .Containers.IP "redis" }}:6379
+      - PGHOST={{ .Containers.IP "postgres" }}
+      - PGUSER=sg
+      - PGPASS=sg
+      - PGPASSWORD=sg
+      - PGDATABASE=sg
+      - PGSSLMODE=disable
+      - VERSION=YBDEVELOPMENT
+      - IMAGE=sourcegraph_server
+      - DATE=2019-07-10T16:08:45-07:00
+      - ENTERPRISE=1
+      - FORCE_COLOR=0
+      - GO111MODULE=on
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - VERSION=00000_2019-07-10_1234567
+      - TERM=vt100
+
+  - <<: *base
+    name: server
+    container:
+      image: yourbase/yb_ubuntu:18.04
+      privileged: true
+      mounts:
+        - /var/run/docker.sock:/var/run/docker.sock
+    tags:
+      privileged_mode: enabled
+    root: enterprise
+    commands:
+      - curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /tmp/docker.key 
+      - apt-key add /tmp/docker.key
+      - apt-key fingerprint 0EBFCD88
+      - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable" 
+      - apt -y update
+      - apt -y install docker-ce-cli musl musl-dev musl-tools
+      - bash ./cmd/server/pre-build.sh
+      - bash ./cmd/server/build.sh
+ 
+  - <<: *base
+    name: setup
+    commands:
+      - apt install -y libpcre3-dev libsqlite3-dev pkg-config musl-tools postgresql-client socat
+      - npm install -g gulp
+      - npm install -g typescript
+      - npm install -g ts-node
+
+  - <<: *base
+    name: checks
+    commands:
+     - apt -y install postgresql-client
+     - bash ./dev/check/yarn-deduplicate.sh
+     - bash ./dev/check/docsite.sh
+     - bash ./dev/check/gofmt.sh
+     - bash ./dev/check/template-inlines.sh
+     - bash ./dev/check/go-enterprise-import.sh
+     - bash ./dev/check/go-dbconn-import.sh
+     - bash ./dev/check/mgmt-console-conf-import.sh
+     - bash ./dev/check/go-generate.sh
+     - bash ./dev/check/go-lint.sh
+     - bash ./dev/check/todo-security.sh
+     - bash ./dev/check/no-localhost-guard.sh
+     - bash ./dev/check/bash-syntax.sh
+     - bash ./dev/check/check-owners.sh
+
+
+
+  - <<: *base
+    name: lint
+    commands:
+      - bash dev/ci/yarn-run.sh prettier-check all:tslint all:stylelint all:typecheck graphql-lint
+      - bash dev/check/hadolint.sh
+
+  - <<: *base
+    name: webui
+    commands:
+      - bash dev/ci/yarn-build.sh browser
+      - bash dev/ci/yarn-build.sh web
+      - bash dev/ci/yarn-test.sh web
+      - bash dev/ci/yarn-test.sh browser
+      - bash dev/ci/yarn-test.sh shared
+      - bash dev/ci/yarn-run.sh storybook:smoke-test
+
+  - <<: *base
+    name: go_tests
+    commands:
+      - apt install -y libpcre3-dev libsqlite3-dev pkg-config musl-tools postgresql-client socat
+      - add-apt-repository ppa:git-core/ppa
+      - apt update
+      - apt install -y git
+      - git --version
+      - bash ./comby.sh
+      - bash ./cmd/symbols/build.sh buildLibsqlite3Pcre
+      - go test -timeout 4m -coverprofile=coverage.txt -covermode=atomic -race ./...
+      - go generate ./...
+      - go install -tags dist ./cmd/... ./enterprise/cmd/...
+
+  - <<: *base
+    name: db-backcompat
+    commands:
+      - apt install -y postgresql-client
+      - bash ./dev/ci/ci-db-backcompat.sh
+
+  - name: end-to-end-tests
+    commands:
+      - bash ./dev/ci/e2e.sh
+  
+
+ci:
+  builds:
+    - name: run checks
+      build_target: checks
+    - name: build web bits
+      build_target: webui
+    - name: run linters
+      build_target: lint
+    - name: build server
+      build_target: server
+    - name: run go tests
+      build_target: go_tests
+    - name: db-backcompat
+      build_target: db-backcompat
+

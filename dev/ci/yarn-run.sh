@@ -9,5 +9,5 @@ yarn --cwd lsif --frozen-lockfile --network-timeout 60000
 for cmd in "$@"
 do
     echo "--- $cmd"
-    yarn -s run $cmd
+    yarn --scripts-prepend-node-path -s run $cmd
 done

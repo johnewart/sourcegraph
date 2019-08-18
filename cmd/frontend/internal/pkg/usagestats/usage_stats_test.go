@@ -3,6 +3,7 @@ package usagestats
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -373,12 +374,17 @@ func setupForTest(t *testing.T) {
 		t.Skip()
 	}
 
+	redisHostPort := "localhost:6379"
+	if redisHostPortEnv, exists := os.LookupEnv("REDIS_HOSTPORT"); exists {
+		redisHostPort = redisHostPortEnv
+	}
+
 	keyPrefix = "__test__" + t.Name() + ":"
 	pool = &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", "localhost:6379")
+			c, err := redis.Dial("tcp", redisHostPort)
 			if err != nil {
 				return nil, err
 			}

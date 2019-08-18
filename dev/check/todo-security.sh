@@ -5,7 +5,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 set -euf -o pipefail
 unset CDPATH
-REPOROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+#REPOROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+REPOROOT="/workspace"
 
 # Fails and prints matches if any code files contain 'TODO(security)'.
 
