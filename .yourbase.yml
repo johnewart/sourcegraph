@@ -1,10 +1,10 @@
 dependencies:
   build:
-    - go:1.12.1
+    - go:1.13
     - node:12.6.0
     - homebrew:latest
   runtime:
-    - go:1.12.1
+    - go:1.13
     - node:12.6.0
     - homebrew:latest
 
