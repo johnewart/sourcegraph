@@ -1,11 +1,11 @@
 dependencies:
   build:
-    - go:1.12.1
+    - go:1.13
     - node:12.6.0
     - yarn:1.17.3
     - python:2.7.16
   runtime:
-    - go:1.12.1
+    - go:1.13
     - node:12.6.0
     - yarn:1.17.3
     - python:2.7.16
